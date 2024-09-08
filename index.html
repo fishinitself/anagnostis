@@ -21,6 +21,7 @@
     <h1 class="text-secondary">Εντάξει reader</h1>
     <br/>
     <div class="mb-3">
+
     <textarea id="text-input" rows="10" class="form-control shadow p-3 mb-5 bg-body rounded"
               placeholder="Put your greek text here..." style="overflow: scroll">
   Η Αφροδίτη κατά την αρχαία ελληνική μυθολογία και θρησκεία είναι η θεά του έρωτα, της ομορφιάς,
@@ -29,6 +30,7 @@
   ενώ παρουσιάζει και πολλά κοινά στοιχεία με την αιγυπτιακή θεά Άθωρ.
   Σε αυτήν οφείλει το όνομά του ο πλανήτης Αφροδίτη.
     </textarea>
+
     </div>
     <div class="btn-toolbar" role="toolbar" aria-label="Toolbar">
         <div class="btn-group me-2" role="group" aria-label="group1">
@@ -101,14 +103,24 @@
     let speech
     let stopNextWord = false
 
+    const tts = document.getElementById("tts")
+
+    tts.addEventListener('paste', function (e) {
+        e.preventDefault()
+        var text = e.clipboardData.getData('text/plain')
+        document.execCommand('insertText', false, text)
+    })
+
+
     function init() {
 
         speech = new SpeechSynthesisUtterance(document.getElementById("text-input").value)
+
         setOptions()
         speech.lang = "el-GR";
         speech.onboundary = function (event) {
             if (event.name === "word") {
-                highlightWord(event.charIndex, event.charLength);
+                selectWord(event.charIndex, event.charLength);
                 if (stopNextWord) {
                     pauseSpeech()
                     stopNextWord = false
@@ -161,6 +173,7 @@
     }
 
 
+
     function highlightWord(startIndex, length) {
         const text = document.getElementById("text-input")
         if (!startIndex) {
@@ -175,6 +188,7 @@
         text.setSelectionRange(startIndex, selectionEnd);
     }
 
+
     function pauseSpeech() {
         let speechS = window.speechSynthesis
         if (speechS.speaking) {
@@ -188,18 +202,41 @@
             speechS.cancel()
             speechS.speak(speech)
         }
-        document.getElementById("text-input").focus()
+        tts.focus()
     }
 
     function resetSpeech() {
         window.speechSynthesis.cancel()
-        removeSelection()
-        document.getElementById("text-input").focus()
+        tts.focus()
     }
 
-    function removeSelection() {
-        const text = document.getElementById("text-input");
-        text.setSelectionRange(0, 0);
+    function selectWord(startIndex, length) {
+        if (startIndex) {
+            highlightWord(startIndex, length)
+        }
+    }
+
+
+    function highlightWord(startIndex, length) {
+        const text = tts.textContent;
+
+        const before = text.slice(0, startIndex);
+        const highlighted = text.slice(startIndex, startIndex + length);
+        const after = text.slice(startIndex + length);
+
+        tts.innerHTML = '';
+
+        const beforeText = document.createTextNode(before);
+        tts.appendChild(beforeText);
+
+        const span = document.createElement('span');
+        span.textContent = highlighted;
+        span.style.backgroundColor = 'yellow';
+        tts.appendChild(span);
+
+        const afterText = document.createTextNode(after);
+        tts.appendChild(afterText);
+        span.scrollIntoView({behavior: "smooth", block: "center", inline: "nearest"});
     }
 
 </script>
