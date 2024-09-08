@@ -22,7 +22,7 @@
     <br/>
     <div class="mb-3">
 
-    <textarea id="text-input" rows="10" class="form-control shadow p-3 mb-5 bg-body rounded"
+    <textarea id="tts" rows="10" class="form-control shadow p-3 mb-5 bg-body rounded"
               placeholder="Put your greek text here..." style="overflow: scroll">
   Η Αφροδίτη κατά την αρχαία ελληνική μυθολογία και θρησκεία είναι η θεά του έρωτα, της ομορφιάς,
   της σεξουαλικότητας, της ηδονής, των απολαύσεων και της τεκνοποίησης.
@@ -73,22 +73,28 @@
 
                     <br/>
 
-                    <label for="rate" class="form-label">Rate</label>
-                    <input type="range" class="form-range" id="rate" min="0.1" max="10" step="0.1" value="0.5"
-                           onchange="init()">
-
-                    <label for="pitch" class="form-label">Pitch</label>
-                    <input type="range" class="form-range" id="pitch" min="0" max="2" step="0.1" value="0.8"
-                           onchange="init()">
-                    <label for="volume" class="form-label">Volume</label>
-                    <input type="range" class="form-range" id="volume" min="0" max="1" step="0.1" value="1"
-                           onchange="init()">
-
+                    <table style="width: 100%">
+                        <tr>
+                            <td><label for="rate" class="form-label">Rate</label></td>
+                            <td><input type="range" class="form-range" id="rate" min="0.1" max="10" step="0.1" value="0.7"
+                                       onchange="init()"></td>
+                        </tr>
+                        <tr>
+                            <td><label for="pitch" class="form-label">Pitch</label></td>
+                            <td><input type="range" class="form-range" id="pitch" min="0" max="2" step="0.1" value="0.8"
+                                       onchange="init()"></td>
+                        </tr>
+                        <tr>
+                            <td><label for="volume" class="form-label">Volume</label></td>
+                            <td><input type="range" class="form-range" id="volume" min="0" max="1" step="0.1" value="1"
+                                       onchange="init()"></td>
+                        </tr>
+                    </table>
 
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" onclick="setOptions()" data-bs-dismiss="modal">
-                        Close
+                    <button type="button" class="btn btn-primary" onclick="resetSpeech()" data-bs-dismiss="modal">
+                        Apply
                     </button>
                 </div>
             </div>
@@ -105,16 +111,9 @@
 
     const tts = document.getElementById("tts")
 
-    tts.addEventListener('paste', function (e) {
-        e.preventDefault()
-        var text = e.clipboardData.getData('text/plain')
-        document.execCommand('insertText', false, text)
-    })
-
-
     function init() {
 
-        speech = new SpeechSynthesisUtterance(document.getElementById("text-input").value)
+        speech = new SpeechSynthesisUtterance(tts.value)
 
         setOptions()
         speech.lang = "el-GR";
@@ -132,18 +131,10 @@
                 let stringToCheck = speech.text.substring(event.charIndex + event.charLength)
                 if (pauseOnNextWord(stringToCheck, autoPauseNewLine, autoPauseNewSentence)) {
                     stopNextWord = true
-                    return
                 }
             }
         }
     }
-
-    function setOptions() {
-        speech.rate = document.getElementById("rate").value;
-        speech.pitch = document.getElementById("pitch").value;
-        speech.volume = document.getElementById("volume").value;
-    }
-
 
     function pauseOnNextWord(str, pauseOnNewLine = true, pauseOnNewSentence = true) {
         if (pauseOnNewLine || pauseOnNewSentence) {
@@ -175,17 +166,16 @@
 
 
     function highlightWord(startIndex, length) {
-        const text = document.getElementById("text-input")
         if (!startIndex) {
             startIndex = 0
         }
-        text.focus()
-        const fullText = text.value;
+        tts.focus()
+        const fullText = tts.value;
         const selectionEnd = startIndex + length;
-        text.value = fullText.substring(0, selectionEnd);
-        text.scrollTop = text.scrollHeight;
-        text.value = fullText;
-        text.setSelectionRange(startIndex, selectionEnd);
+        tts.value = fullText.substring(0, selectionEnd);
+        tts.scrollTop = tts.scrollHeight;
+        tts.value = fullText;
+        tts.setSelectionRange(startIndex, selectionEnd);
     }
 
 
@@ -208,35 +198,20 @@
     function resetSpeech() {
         window.speechSynthesis.cancel()
         tts.focus()
+        highlightWord(0, 0)
+        setOptions()
+    }
+
+    function setOptions() {
+        speech.rate = document.getElementById("rate").value;
+        speech.pitch = document.getElementById("pitch").value;
+        speech.volume = document.getElementById("volume").value;
     }
 
     function selectWord(startIndex, length) {
         if (startIndex) {
             highlightWord(startIndex, length)
         }
-    }
-
-
-    function highlightWord(startIndex, length) {
-        const text = tts.textContent;
-
-        const before = text.slice(0, startIndex);
-        const highlighted = text.slice(startIndex, startIndex + length);
-        const after = text.slice(startIndex + length);
-
-        tts.innerHTML = '';
-
-        const beforeText = document.createTextNode(before);
-        tts.appendChild(beforeText);
-
-        const span = document.createElement('span');
-        span.textContent = highlighted;
-        span.style.backgroundColor = 'yellow';
-        tts.appendChild(span);
-
-        const afterText = document.createTextNode(after);
-        tts.appendChild(afterText);
-        span.scrollIntoView({behavior: "smooth", block: "center", inline: "nearest"});
     }
 
 </script>
