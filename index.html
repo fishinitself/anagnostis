@@ -131,7 +131,7 @@
 
         speech.onboundary = function (event) {
             if (event.name === "word") {
-                selectWord(event.charIndex, event.charLength);
+                selectWord(event.charIndex, event.charLength)
                 if (stopNextWord) {
                     pauseSpeech()
                     stopNextWord = false
@@ -172,7 +172,7 @@
                 }
             }
         }
-        return false;
+        return false
     }
 
     function highlightWord(startIndex, length) {
@@ -180,12 +180,12 @@
             startIndex = 0
         }
         tts.focus()
-        const fullText = tts.value;
-        const selectionEnd = startIndex + length;
-        tts.value = fullText.substring(0, selectionEnd);
-        tts.scrollTop = tts.scrollHeight;
-        tts.value = fullText;
-        tts.setSelectionRange(startIndex, selectionEnd);
+        const fullText = tts.value
+        const selectionEnd = startIndex + length
+        tts.value = fullText.substring(0, selectionEnd)
+        tts.scrollTop = tts.scrollHeight
+        tts.value = fullText
+        tts.setSelectionRange(startIndex, selectionEnd)
     }
 
     function pauseSpeech() {
@@ -212,11 +212,11 @@
     }
 
     function setOptions() {
-        speech.lang = "el-GR";
+        speech.lang = "el-GR"
         speech.text = tts.value
-        speech.rate = document.getElementById("rate").value;
-        speech.pitch = document.getElementById("pitch").value;
-        speech.volume = document.getElementById("volume").value;
+        speech.rate = document.getElementById("rate").value
+        speech.pitch = document.getElementById("pitch").value
+        speech.volume = document.getElementById("volume").value
     }
 
     function selectWord(startIndex, length) {
@@ -226,36 +226,44 @@
     }
 
     function listVoices() {
-        const synth = window.speechSynthesis;
-        let voices = synth.getVoices();
+        const synth = window.speechSynthesis
+        let voices = synth.getVoices()
         if (voices.length === 0) {
             // Some browsers load voices asynchronously.
             synth.onvoiceschanged = () => {
-                voices = synth.getVoices();
-                processVoice(voices);
-            };
+                voices = synth.getVoices()
+                processLanguages(voices)
+            }
         } else {
-            processVoice(voices);
+            processLanguages(voices)
         }
     }
 
-    function processVoice(voices) {
+    function processLanguages(voices) {
         voices.forEach((voice, index) => {
-            console.log(`Voice #${index + 1}: Name: ${voice.name} Language: ${voice.lang} Default: ${voice.default} Local Service: ${voice.localService}`);
-        });
+            console.log(`Voice #${index + 1}: Name: ${voice.name} Language: ${voice.lang} Default: ${voice.default} Local Service: ${voice.localService}`)
+        })
 
-        const languages = new Set();
+        const languages = new Set()
         voices.forEach(voice => { languages.add(voice.lang) })
-        const langSelect = document.getElementById("lang");
+        const langSelect = document.getElementById("lang")
         languages.forEach((lang) => {
                 const option = document.createElement("option")
-                option.textContent = lang;
-                langSelect.appendChild(option);
+                option.textContent = languageCodeToReadableForm(lang)
+                option.value = lang
+                langSelect.appendChild(option)
                 if (lang === "el-GR") {
-                    langSelect.selectedIndex = lang;
+                    langSelect.value = lang
                 }
             }
         )
+    }
+
+    function languageCodeToReadableForm(languageCode) {
+        const [language, region] = languageCode.split('-')
+        const languageName = new Intl.DisplayNames(['en'], { type: 'language' }).of(language)
+        const regionName = new Intl.DisplayNames(['en'], { type: 'region' }).of(region)
+        return `${languageName} (${regionName})`
     }
 
 </script>
