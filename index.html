@@ -61,6 +61,15 @@
                 </div>
                 <div class="modal-body">
 
+
+                    <div class="form-group">
+                        <label for="lang">Language</label>
+                        <select class="form-control" id="lang">
+                        </select>
+                    </div>
+
+                    <br/>
+
                     <div class="form-check form-switch">
                         <input class="form-check-input" type="checkbox" role="switch" id="autoPauseNewLine" checked>
                         <label class="form-check-label" for="autoPauseNewLine">Auto pause on new line</label>
@@ -110,13 +119,16 @@
     let stopNextWord = false
 
     const tts = document.getElementById("tts")
+    speech = new SpeechSynthesisUtterance(tts.value)
+    listVoices()
+    init()
 
     function init() {
 
         speech = new SpeechSynthesisUtterance(tts.value)
 
         setOptions()
-        speech.lang = "el-GR";
+
         speech.onboundary = function (event) {
             if (event.name === "word") {
                 selectWord(event.charIndex, event.charLength);
@@ -163,8 +175,6 @@
         return false;
     }
 
-
-
     function highlightWord(startIndex, length) {
         if (!startIndex) {
             startIndex = 0
@@ -177,7 +187,6 @@
         tts.value = fullText;
         tts.setSelectionRange(startIndex, selectionEnd);
     }
-
 
     function pauseSpeech() {
         let speechS = window.speechSynthesis
@@ -203,6 +212,8 @@
     }
 
     function setOptions() {
+        speech.lang = "el-GR";
+        speech.text = tts.value
         speech.rate = document.getElementById("rate").value;
         speech.pitch = document.getElementById("pitch").value;
         speech.volume = document.getElementById("volume").value;
@@ -212,6 +223,39 @@
         if (startIndex) {
             highlightWord(startIndex, length)
         }
+    }
+
+    function listVoices() {
+        const synth = window.speechSynthesis;
+        let voices = synth.getVoices();
+        if (voices.length === 0) {
+            // Some browsers load voices asynchronously.
+            synth.onvoiceschanged = () => {
+                voices = synth.getVoices();
+                processVoice(voices);
+            };
+        } else {
+            processVoice(voices);
+        }
+    }
+
+    function processVoice(voices) {
+        voices.forEach((voice, index) => {
+            console.log(`Voice #${index + 1}: Name: ${voice.name} Language: ${voice.lang} Default: ${voice.default} Local Service: ${voice.localService}`);
+        });
+
+        const languages = new Set();
+        voices.forEach(voice => { languages.add(voice.lang) })
+        const langSelect = document.getElementById("lang");
+        languages.forEach((lang) => {
+                const option = document.createElement("option")
+                option.textContent = lang;
+                langSelect.appendChild(option);
+                if (lang === "el-GR") {
+                    langSelect.selectedIndex = lang;
+                }
+            }
+        )
     }
 
 </script>
