@@ -161,8 +161,6 @@
                 if (pauseOnNextWord(stringToCheck, autoPauseNewLine, autoPauseNewSentence)) {
                     stopNextWord = 2
                 }
-
-                console.log(stringToCheck, stopNextWord)
             }
         }
     }
@@ -257,9 +255,6 @@
     }
 
     function processLanguages(voices) {
-        voices.forEach((voice, index) => {
-            console.log(`Voice #${index + 1}: Name: ${voice.name} Language: ${voice.lang} Default: ${voice.default} Local Service: ${voice.localService}`)
-        })
 
         const languages = new Set()
         voices.forEach(voice => { languages.add(voice.lang) })
