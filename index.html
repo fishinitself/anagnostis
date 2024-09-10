@@ -61,26 +61,6 @@
                 </div>
                 <div class="modal-body">
 
-                    <table style="width: 100%">
-                        <tr>
-                            <td style="width: 50%">
-                                <div class="form-group">
-                                    <label for="lang">Language</label>
-                                    <select class="form-control" id="lang" onchange="setVoice()">
-                                    </select>
-                                </div>
-                            </td>
-                            <td style="width: 50%">
-                                <div class="form-group">
-                                    <label for="voice">Voice</label>
-                                    <select class="form-control" id="voice">
-                                    </select>
-                                </div>
-
-                            </td>
-                        </tr>
-                    </table>
-
 
                     <br/>
 
@@ -97,6 +77,27 @@
                     <br/>
 
                     <table style="width: 100%">
+                        <tr>
+                            <td><label for="lang">Language / Voice</label></td>
+                            <td>
+                                <table style="width: 100%">
+                                    <tr>
+                                        <td style="width: 50%">
+                                            <select class="form-control" id="lang" onchange="setVoice()">
+                                            </select>
+                                        </td>
+                                        <td style="width: 50%">
+                                            <select class="form-control" id="voice">
+                                            </select>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>&nbsp;</td><td> </td>
+                        </tr>
+
                         <tr>
                             <td><label for="rate" class="form-label">Rate</label></td>
                             <td><input type="range" class="form-range" id="rate" min="0.1" max="10" step="0.1" value="0.7"
@@ -226,7 +227,8 @@
     }
 
     function setOptions() {
-        speech.lang = "el-GR"
+        speech.lang = document.getElementById("lang").value
+        speech.voice = window.speechSynthesis.getVoices().filter(voice => voice.name === document.getElementById("voice").value)[0]
         speech.text = tts.value
         speech.rate = document.getElementById("rate").value
         speech.pitch = document.getElementById("pitch").value
