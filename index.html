@@ -131,7 +131,7 @@
 
 <script>
     let speech
-    let stopNextWord = false
+    let stopNextWord = 0
 
     const tts = document.getElementById("tts")
     speech = new SpeechSynthesisUtterance(tts.value)
@@ -146,19 +146,25 @@
 
         speech.onboundary = function (event) {
             if (event.name === "word") {
-                selectWord(event.charIndex, event.charLength)
-                if (stopNextWord) {
+                if (stopNextWord === 1) {
                     pauseSpeech()
-                    stopNextWord = false
-                    return
+                    stopNextWord = 0
                 }
+                if (stopNextWord === 2) {
+                    stopNextWord = 1
+                }
+
+                selectWord(event.charIndex, event.charLength)
 
                 let autoPauseNewLine = document.getElementById("autoPauseNewLine").checked
                 let autoPauseNewSentence = document.getElementById("autoPauseNewSentence").checked
                 let stringToCheck = speech.text.substring(event.charIndex + event.charLength)
+
                 if (pauseOnNextWord(stringToCheck, autoPauseNewLine, autoPauseNewSentence)) {
-                    stopNextWord = true
+                    stopNextWord = 2
                 }
+
+                console.log(stringToCheck, stopNextWord)
             }
         }
     }
@@ -168,7 +174,8 @@
             const sentenceD = new Set(['.', ';', '!', '?'])
             const newLineD = new Set(['\n'])
             const wordD = new Set([' ', '\t'])
-            let leadingSpaces = true
+
+            str = str.trimStart()
 
             for (let i = 0; i < str.length; i++) {
                 const c = str[i]
@@ -179,11 +186,7 @@
                     return true
                 }
                 if (wordD.has(c)) {
-                    if (!leadingSpaces) {
-                        return false
-                    }
-                } else {
-                    leadingSpaces = false
+                    return false
                 }
             }
         }
